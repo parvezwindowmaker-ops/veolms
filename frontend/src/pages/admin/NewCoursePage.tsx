@@ -13,6 +13,20 @@ import { Textarea } from '@/components/ui/textarea'
 
 const LEVELS = ['beginner', 'intermediate', 'advanced'] as const
 
+/** Small section heading inside the form card. */
+function SectionHeader({ title, hint }: { title: string; hint?: string }) {
+  return (
+    <div>
+      <h2 className="font-grotesk text-sm font-bold uppercase tracking-wide text-foreground">
+        {title}
+      </h2>
+      {hint && (
+        <p className="mt-0.5 text-xs font-medium text-muted-foreground">{hint}</p>
+      )}
+    </div>
+  )
+}
+
 export function NewCoursePage() {
   const navigate = useNavigate()
   const create = useCreateCourse()
@@ -22,7 +36,9 @@ export function NewCoursePage() {
   const [description, setDescription] = useState('')
   const [thumbnail, setThumbnail] = useState<ThumbnailValue>({ assetId: null, url: '' })
   const [level, setLevel] = useState<(typeof LEVELS)[number]>('beginner')
-  const [priceRupees, setPriceRupees] = useState('0')
+  // Empty = free (₹0). Kept empty (with a "0" placeholder) so there's no leading
+  // zero to delete before typing a price.
+  const [priceRupees, setPriceRupees] = useState('')
   const [error, setError] = useState('')
 
   const rupees = Number(priceRupees)
@@ -91,82 +107,103 @@ export function NewCoursePage() {
         </div>
       </div>
 
-      <form onSubmit={onSubmit} className="pop space-y-6 p-6 sm:p-8">
-        <div className="space-y-2">
-          <Label htmlFor="title">Title</Label>
-          <Input
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. The Complete JavaScript Course"
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="subtitle">Subtitle</Label>
-          <Input
-            id="subtitle"
-            value={subtitle}
-            onChange={(e) => setSubtitle(e.target.value)}
-            placeholder="One line that sells the course"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="description">Description</Label>
-          <Textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="What will students learn?"
-            rows={5}
-          />
-        </div>
-
-        <ThumbnailField value={thumbnail} onChange={setThumbnail} />
-
-        {/* Divider */}
-        <div className="border-t-2 border-dashed border-border" />
-
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+      <form onSubmit={onSubmit} className="pop space-y-8 p-6 sm:p-8">
+        {/* Details */}
+        <section className="space-y-5">
+          <SectionHeader title="Course details" hint="The essentials students see first." />
           <div className="space-y-2">
-            <Label htmlFor="level">Level</Label>
-            <Select
-              id="level"
-              value={level}
-              onChange={(v) => setLevel(v as (typeof LEVELS)[number])}
-              options={LEVELS.map((l) => ({ value: l, label: l }))}
-              className="capitalize"
+            <Label htmlFor="title">
+              Title <span className="text-primary-strong">*</span>
+            </Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. The Complete JavaScript Course"
+              required
             />
           </div>
-
           <div className="space-y-2">
-            <Label htmlFor="price">Price</Label>
-            <div className="relative">
-              <IndianRupee className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                id="price"
-                type="number"
-                min={0}
-                step="1"
-                value={priceRupees}
-                onChange={(e) => setPriceRupees(e.target.value)}
-                className="pl-9"
+            <Label htmlFor="subtitle">Subtitle</Label>
+            <Input
+              id="subtitle"
+              value={subtitle}
+              onChange={(e) => setSubtitle(e.target.value)}
+              placeholder="One line that sells the course"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="What will students learn? What will they build?"
+              rows={5}
+            />
+          </div>
+        </section>
+
+        <div className="border-t-2 border-dashed border-border" />
+
+        {/* Cover image */}
+        <section className="space-y-4">
+          <SectionHeader
+            title="Cover image"
+            hint="Shown on the catalog card and the course page."
+          />
+          <ThumbnailField value={thumbnail} onChange={setThumbnail} hideLabel />
+        </section>
+
+        <div className="border-t-2 border-dashed border-border" />
+
+        {/* Level & pricing */}
+        <section className="space-y-5">
+          <SectionHeader title="Level & pricing" />
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="level">Level</Label>
+              <Select
+                id="level"
+                value={level}
+                onChange={(v) => setLevel(v as (typeof LEVELS)[number])}
+                options={LEVELS.map((l) => ({ value: l, label: l }))}
+                className="capitalize"
               />
             </div>
-            <span
-              className={
-                'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ' +
-                (isFree
-                  ? 'bg-teal/15 text-teal'
-                  : 'bg-secondary text-primary-strong')
-              }
-            >
-              {isFree
-                ? 'Free course — anyone can enroll'
-                : `Students pay ₹${rupees.toLocaleString('en-IN')} once`}
-            </span>
+
+            <div className="space-y-2">
+              <Label htmlFor="price">Price</Label>
+              <div className="relative">
+                <IndianRupee className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="price"
+                  type="number"
+                  min={0}
+                  step="1"
+                  inputMode="numeric"
+                  placeholder="0"
+                  value={priceRupees}
+                  onFocus={(e) => e.currentTarget.select()}
+                  onChange={(e) => setPriceRupees(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <span
+                className={
+                  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ' +
+                  (isFree
+                    ? 'bg-teal/15 text-teal'
+                    : 'bg-secondary text-primary-strong')
+                }
+              >
+                {isFree
+                  ? 'Free — anyone can enroll'
+                  : `Students pay ₹${rupees.toLocaleString('en-IN')} once`}
+              </span>
+            </div>
           </div>
-        </div>
+        </section>
 
         {error && (
           <p className="rounded-xl border-2 border-destructive/20 bg-destructive/10 px-3.5 py-2.5 text-sm font-semibold text-destructive">
@@ -174,7 +211,8 @@ export function NewCoursePage() {
           </p>
         )}
 
-        <div className="flex flex-wrap gap-3 pt-1">
+        {/* Footer actions */}
+        <div className="flex flex-wrap gap-3 border-t-2 border-border pt-6">
           <Button type="submit" size="lg" disabled={create.isPending}>
             {create.isPending ? 'Creating…' : 'Create course'}
           </Button>

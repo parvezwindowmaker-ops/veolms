@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { IndianRupee } from 'lucide-react'
 import { Modal } from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -31,7 +32,10 @@ export function CourseDetailsModal({
       : { assetId: null, url: course.thumbnail ?? '' }
   )
   const [level, setLevel] = useState<(typeof LEVELS)[number]>(course.level)
-  const [priceRupees, setPriceRupees] = useState(String((course.price ?? 0) / 100))
+  // Empty = free (₹0); avoids a leading zero the user has to clear before typing.
+  const [priceRupees, setPriceRupees] = useState(
+    course.price ? String(course.price / 100) : ''
+  )
   const [error, setError] = useState('')
 
   const onSubmit = async (e: FormEvent) => {
@@ -105,15 +109,25 @@ export function CourseDetailsModal({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="cPrice">Price (₹)</Label>
-            <Input
-              id="cPrice"
-              type="number"
-              min={0}
-              step="1"
-              value={priceRupees}
-              onChange={(e) => setPriceRupees(e.target.value)}
-            />
+            <Label htmlFor="cPrice">Price</Label>
+            <div className="relative">
+              <IndianRupee className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="cPrice"
+                type="number"
+                min={0}
+                step="1"
+                inputMode="numeric"
+                placeholder="0"
+                value={priceRupees}
+                onFocus={(e) => e.currentTarget.select()}
+                onChange={(e) => setPriceRupees(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <p className="text-xs font-medium text-muted-foreground">
+              Leave empty or 0 for a free course.
+            </p>
           </div>
         </div>
 
