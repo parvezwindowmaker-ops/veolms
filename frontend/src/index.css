@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 /*
- * VeoLMS theme — "Campus": vibrant & friendly. Warm white ground, a confident
+ * VeoLMS theme, "Campus": vibrant & friendly. Warm white ground, a confident
  * coral primary with amber/teal supports, bold ink-outlined cards with soft
  * offset shadows, pill buttons, Plus Jakarta Sans + Space Grotesk. Light theme.
  */
@@ -128,7 +128,7 @@
     transform: translate(-3px, -4px);
     box-shadow: 9px 12px 0 var(--ink);
   }
-  /* Softer card variant — same language, lighter weight for dense areas. */
+  /* Softer card variant: same language, lighter weight for dense areas. */
   .pop-soft {
     border: 2px solid var(--ink);
     border-radius: 18px;

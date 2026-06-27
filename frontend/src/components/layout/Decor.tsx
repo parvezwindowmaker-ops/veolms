@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 
 /**
  * Clipped decorative layer for page headers/heroes. It holds the blurred blobs
- * (and optional dotted texture) and clips THEM to its own box — so the parent no
+ * (and optional dotted texture) and clips THEM to its own box, so the parent no
  * longer needs `overflow-hidden`. That's important now that buttons and `.pop`
  * cards carry a bold offset shadow: an `overflow-hidden` parent would clip those
  * shadows (and hover lifts) at the edge. Sits behind content via `-z-10`.

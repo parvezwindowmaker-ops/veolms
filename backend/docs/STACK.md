@@ -13,7 +13,7 @@ _Last updated: 2026-06 (Node 24 LTS, TypeScript 6)._
 | typescript | ^6.0.3 | stable; `module`/`moduleResolution` = `NodeNext` |
 | tsx | ^4.22.4 | dev runner (`tsx watch`) |
 | express | ^5.2.1 | v5 (async errors auto-forward) |
-| sequelize | ^6.37.8 | **v6, not v7** — v7 is still `alpha` |
+| sequelize | ^6.37.8 | **v6, not v7** (v7 is still `alpha`) |
 | pg / pg-hstore | ^8.22.0 / ^2.3.4 | Postgres driver for Sequelize |
 | ioredis | ^5.11.1 | Redis client |
 | jsonwebtoken | ^9.0.3 | JWT sign/verify |
@@ -22,30 +22,30 @@ _Last updated: 2026-06 (Node 24 LTS, TypeScript 6)._
 | dotenv | ^17.4.2 | use `quiet: true` |
 | dompurify + jsdom | ^3.4.11 / ^29.1.1 | server-side HTML sanitization |
 | @aws-sdk/client-s3 + s3-request-presigner | ^3.x | Cloudflare R2 (S3-compatible) client + presigned URLs |
-| Razorpay | (no dep) | payments via the **Orders REST API** (`fetch` + Basic auth) + `crypto` HMAC — deliberately **no SDK** |
+| Razorpay | (no dep) | payments via the **Orders REST API** (`fetch` + Basic auth) + `crypto` HMAC, deliberately **no SDK** |
 | express-rate-limit | ^7.5.1 | v7 supports Express 5; in-memory store (swap for Redis store to scale horizontally) |
 | ffmpeg | system (alpine pkg) | encrypted-HLS transcode of uploaded video; installed in the Dockerfile, invoked via `child_process` |
-| cors | ^2.8.6 | — |
+| cors | ^2.8.6 | - |
 
 `npm outdated` to check; `npm view <pkg> dist-tags` to confirm stable vs alpha/beta before bumping a major.
 
 ## Why not the newest of everything
 
-- **Sequelize 6, not 7** — v7 is a TS-first rewrite but published only under the `alpha` dist-tag. Stay on v6 until `latest` points at 7.
-- **`@types/node` = 24, not 26** — `@types/node` must match the Node.js runtime major (we run Node 24). Using 26 types against a 24 runtime exposes APIs that don't exist at runtime.
-- **`uuid` advisory (GHSA-w5hq-g745-h8pq)** — `uuid` is a *transitive* dep of Sequelize, not ours. The vuln is only in the `buf`-argument path, which neither our code (BIGSERIAL ids, no uuid) nor Sequelize's internal use hits. `npm audit fix --force` would downgrade Sequelize to 3.x — do **not** run it. Clears when Sequelize bumps uuid.
+- **Sequelize 6, not 7.** v7 is a TS-first rewrite, but it's published only under the `alpha` dist-tag. Stay on v6 until `latest` points at 7.
+- **`@types/node` = 24, not 26.** `@types/node` must match the Node.js runtime major (we run Node 24). Using 26 types against a 24 runtime exposes APIs that don't exist at runtime.
+- **`uuid` advisory (GHSA-w5hq-g745-h8pq).** `uuid` is a *transitive* dep of Sequelize, not ours. The vuln is only in the `buf`-argument path, which neither our code (BIGSERIAL ids, no uuid) nor Sequelize's internal use hits. `npm audit fix --force` would downgrade Sequelize to 3.x, so do **not** run it. Clears when Sequelize bumps uuid.
 
 ## Per-package notes
 
 ### TypeScript 6
 - `tsconfig`: `module`/`moduleResolution` = **`NodeNext`** (the old `node`/`node10` is deprecated and errors-with-warning in TS 6). NodeNext + a CommonJS `package.json` (no `"type":"module"`) emits CommonJS and still allows extensionless relative imports.
-- `strict` + `noUnused*` + `noImplicitReturns` on. Underscore-prefixed params (`_req`, `_next`) are exempt from no-unused — used for Express error-handler signatures.
+- `strict` + `noUnused*` + `noImplicitReturns` on. Underscore-prefixed params (`_req`, `_next`) are exempt from no-unused; they're used for Express error-handler signatures.
 
 ### Express 5 (migration notes)
 - **Rejected promises in handlers auto-forward to error middleware.** Our `asyncHandler` is therefore redundant but kept (harmless, explicit, version-agnostic).
-- **`req.body` is `undefined` when unparsed** (was `{}` in v4) — always `req.body ?? {}` / `req.body?.x`. We do.
+- **`req.body` is `undefined` when unparsed** (was `{}` in v4), so always `req.body ?? {}` / `req.body?.x`. We do.
 - `req.query` is a read-only getter now (we only read it).
-- Wildcard routes need names (`/*splat`) — we use none. `app.use(handler)` for 404/error still fine.
+- Wildcard routes need names (`/*splat`); we use none. `app.use(handler)` for 404/error still fine.
 - `app.listen(port, cb)` cb may receive an error arg.
 
 ### Sequelize 6 + TypeScript
@@ -54,7 +54,7 @@ _Last updated: 2026-06 (Node 24 LTS, TypeScript 6)._
 - **BIGINT returns a string** from `pg` by default → set `pg.defaults.parseInt8 = true` (in `db/sequelize.ts`) to get JS numbers. Safe under `Number.MAX_SAFE_INTEGER`.
 - Associations are defined once in `db/associations.ts` (`defineAssociations()`), called before `sync()`. Use `as` aliases (`role`, `menu`, `parent`, `children`) and the same alias in `include`.
 - Scopes: `defaultScope` filters every query; a named `.scope()` or `.unscoped()` overrides it. We exclude `password` by default and `unscoped()` in login.
-- Hooks: `beforeSave` (create+update) hashes password guarded by `user.changed('password')`. Hooks run on **instance** `.save()`/`.create()`, **not** on static `Model.update()` unless `individualHooks: true` — so update flows fetch the instance and `.save()`.
+- Hooks: `beforeSave` (create+update) hashes password guarded by `user.changed('password')`. Hooks run on **instance** `.save()`/`.create()`, **not** on static `Model.update()` unless `individualHooks: true`, so update flows fetch the instance and `.save()`.
 - Write integrity: multi-step writes (e.g. permission replace) use `sequelize.transaction(...)`.
 
 ### ioredis 5
@@ -63,10 +63,10 @@ _Last updated: 2026-06 (Node 24 LTS, TypeScript 6)._
 
 ### jsonwebtoken 9
 - `jwt.sign(payload, secret, { expiresIn })`. The typed `expiresIn` wants `number | ms.StringValue`; our value is a validated config string, cast at the call site.
-- `jwt.verify` throws on bad/expired token — caught in `auth_middleware` → 401.
+- `jwt.verify` throws on a bad or expired token, which `auth_middleware` catches and turns into a 401.
 
 ### bcryptjs 3
-- Ships its own types — **do not install `@types/bcryptjs`** (deprecated stub).
+- Ships its own types, so **do not install `@types/bcryptjs`** (deprecated stub).
 - API unchanged: `bcrypt.hash(pw, rounds)` (generates salt internally, used in the model hook), `bcrypt.compare(pw, hash)`.
 
 ### multer 2
@@ -81,27 +81,27 @@ _Last updated: 2026-06 (Node 24 LTS, TypeScript 6)._
 
 ### @aws-sdk/client-s3 + s3-request-presigner (Cloudflare R2)
 - R2 is S3-compatible: `new S3Client({ region: 'auto', endpoint: R2_ENDPOINT, credentials })`.
-- **`getSignedUrl(...)` is offline** — it signs locally with no network call, so presigned upload/playback URLs can be generated (and unit-tested) without contacting R2.
+- **`getSignedUrl(...)` is offline**: it signs locally with no network call, so presigned upload/playback URLs can be generated (and unit-tested) without contacting R2.
 - Upload is direct-to-R2 via a presigned **PUT** (app never proxies bytes). Playback is a short-lived presigned **GET** with `ResponseContentDisposition: inline`. Bucket is private; `storageKey` is never returned to clients.
 - The storage service throws `ApiError(503)` when R2 is unconfigured; controllers check `isStorageConfigured()` first so the app runs fine without R2 (external-URL lessons still work).
 
-### Encrypted HLS video (ffmpeg + hls.js) — anti-download
-- On upload-confirm, [services/hls-service.ts](src/services/hls-service.ts) runs **ffprobe** (source height) then **ffmpeg** to produce **adaptive multi-rendition AES-128 encrypted HLS** — variant streams (360/480/720/1080p ≤ source) + a `master.m3u8` via `-var_stream_map`/`-master_pl_name`, encrypted with `-hls_key_info_file`. Uploads all `.m3u8` + `.ts` to R2 under `hls/<assetId>/`, stores the 16-byte key, and **deletes the raw MP4**. Re-encode cost is real — a future optimization is an on-demand worker that spins up per upload and shuts down.
+### Encrypted HLS video (ffmpeg + hls.js): anti-download
+- On upload-confirm, [services/hls-service.ts](src/services/hls-service.ts) runs **ffprobe** (source height) then **ffmpeg** to produce **adaptive multi-rendition AES-128 encrypted HLS**: variant streams (360/480/720/1080p ≤ source) + a `master.m3u8` via `-var_stream_map`/`-master_pl_name`, encrypted with `-hls_key_info_file`. Uploads all `.m3u8` + `.ts` to R2 under `hls/<assetId>/`, stores the 16-byte key, and **deletes the raw MP4**. Re-encode cost is real; a future optimization is an on-demand worker that spins up per upload and shuts down.
 - Playback is **ticket-gated** (short-lived JWT, [services/hls-ticket.ts](src/services/hls-ticket.ts)): the playlist endpoint rewrites the key URI → gated key endpoint and segment names → presigned R2 URLs; the key endpoint returns the raw 16 bytes only with a valid ticket. Network-tab segments are encrypted + key is gated → no single downloadable file.
 - **ffmpeg must be on PATH** (added to the Dockerfile, `apk add ffmpeg`). Graceful: no ffmpeg / transcode error → `hlsStatus='failed'` → playback falls back to a presigned MP4.
 - **R2 bucket CORS** must allow `GET` from the frontend origin (the browser/hls.js fetches segments cross-origin from R2).
 - Frontend: **hls.js** (lazy-loaded via dynamic `import()` so it stays out of the main bundle) attaches to a `<video>`; native HLS (Safari) is the fallback. The custom player adds resume, progress-save, speed, PiP, fullscreen and keyboard shortcuts.
 - Not DRM: within the ticket window a determined enrolled user could still script ffmpeg, and screen-capture defeats any web player. YouTube lessons are inherently public.
 
-### Razorpay (payments) — no SDK
+### Razorpay (payments): no SDK
 - We call the **Orders REST API** directly: `POST https://api.razorpay.com/v1/orders` with
   `Authorization: Basic base64(key_id:key_secret)`. Keeps the dependency surface tiny and the
   exact request/response easy to explain (and audit). Node 24 has global `fetch`.
-- **Signature verification uses `crypto`, not the SDK helper** — fully explainable:
+- **Signature verification uses `crypto`, not the SDK helper**, and is fully explainable:
   - Checkout callback: `HMAC_SHA256(order_id + "|" + payment_id, key_secret)` == `razorpay_signature`.
   - Webhook: `HMAC_SHA256(raw_body, webhook_secret)` == `X-Razorpay-Signature`.
   - Compared with `crypto.timingSafeEqual` (length-guarded) to avoid timing leaks.
-- **Money in minor units (paise) as INTEGER** everywhere — no floats. The order amount is
+- **Money in minor units (paise) as INTEGER** everywhere, no floats. The order amount is
   always read from `course.price` server-side; the client never sends an amount.
 - **Webhook needs the raw body**: mount `express.raw()` on the webhook path *before*
   `express.json()` (express.raw sets `req._body` so json skips it). Re-serialized JSON would
@@ -113,12 +113,12 @@ _Last updated: 2026-06 (Node 24 LTS, TypeScript 6)._
   valid HMAC).
 
 ### express-rate-limit 7
-- v7 supports Express 5. Default **in-memory** store — fine for a single instance; for
+- v7 supports Express 5. Default **in-memory** store, fine for a single instance; for
   horizontal scaling use `rate-limit-redis` backed by the existing ioredis client so counts
   are shared. We deliberately did **not** couple the limiter to Redis, to preserve the
   "Redis is an optional cache" property (a Redis outage shouldn't 500 every limited route).
 - Behind a proxy (Render/Railway/etc.) set `app.set('trust proxy', 1)` so `req.ip` is the
-  real client. Keep it minimal (`1`, not `true`) — a permissive value lets clients spoof
+  real client. Keep it minimal (`1`, not `true`) because a permissive value lets clients spoof
   `X-Forwarded-For` and evade the limiter (express-rate-limit even validates against this).
 - Applied to: payment create-order/verify (`paymentLimiter`), the webhook (`webhookLimiter`,
   a backstop before the HMAC check), and `/user/login` (`authLimiter`, brute-force slowdown).

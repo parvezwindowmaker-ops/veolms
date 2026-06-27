@@ -37,7 +37,7 @@ export class MediaAsset extends Model<
   declare uploadedById: CreationOptional<ForeignKey<number> | null>;
   /** Encrypted-HLS transcode (video only). */
   declare hlsStatus: CreationOptional<HlsStatus>;
-  /** Base64 of the 16-byte AES-128 key — served only via a gated ticket; never serialized. */
+  /** Base64 of the 16-byte AES-128 key, served only via a gated ticket; never serialized. */
   declare hlsKeyB64: CreationOptional<string | null>;
   /** R2 key of the stored HLS playlist (index.m3u8). */
   declare hlsPlaylistKey: CreationOptional<string | null>;

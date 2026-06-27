@@ -12,7 +12,7 @@ dist
 dist-ssr
 *.local
 
-# Env (commit .env.example only — never real env files)
+# Env (commit .env.example only; never real env files)
 .env
 .env.*
 !.env.example

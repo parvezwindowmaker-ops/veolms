@@ -14,7 +14,7 @@ export const notFoundHandler: RequestHandler = (req, res) => {
     .json({ message: `Route not found: ${req.method} ${req.originalUrl}` });
 };
 
-/** Centralized error handler — maps known error types to HTTP responses. */
+/** Centralized error handler that maps known error types to HTTP responses. */
 export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   if (err instanceof ApiError) {
     res.status(err.statusCode).json({ message: err.message });

@@ -11,7 +11,7 @@ import { JwtPayload } from '../types/interface';
  * stays publicly accessible.
  *
  * Note: unlike auth_middleware this skips the Redis permission-version freshness
- * check — these are read-only public reads, so a slightly stale role is harmless.
+ * check, since these are read-only public reads and a slightly stale role is harmless.
  */
 export const optional_auth_middleware: RequestHandler = (req, _res, next) => {
   const authHeader = req.headers.authorization;

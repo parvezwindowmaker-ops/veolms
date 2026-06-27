@@ -57,7 +57,7 @@ export async function validateThumbnailAsset(
   const id = bodyId(value, 'thumbnailAssetId');
   const asset = await MediaAsset.findByPk(id);
   if (!asset || asset.kind !== 'image' || asset.status !== 'ready') {
-    throw new ApiError(400, 'Invalid thumbnail image — upload it first');
+    throw new ApiError(400, 'Invalid thumbnail image. Upload it first.');
   }
   if (!isAdminOrOwner(user, asset.uploadedById ?? null)) {
     throw new ApiError(403, 'You can only use images you uploaded');

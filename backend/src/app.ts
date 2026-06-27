@@ -21,7 +21,7 @@ async function bootstrap(): Promise<void> {
   const app = express();
 
   // Trust one reverse proxy (Render/Railway/etc.) so req.ip is the real client
-  // for rate limiting. Keep it minimal (1) — a permissive value lets clients
+  // for rate limiting. Keep it minimal (1) because a permissive value lets clients
   // spoof X-Forwarded-For and evade the limiter.
   app.set('trust proxy', 1);
 

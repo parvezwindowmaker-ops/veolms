@@ -19,7 +19,7 @@ interface SelectProps {
 }
 
 /**
- * Themed dropdown — replaces the native <select> whose open option list can't be
+ * Themed dropdown that replaces the native <select>, whose open option list can't be
  * styled to match the app. The trigger mirrors the Input (ink border + offset
  * shadow on focus); the menu is rendered through a portal with fixed positioning
  * so it's never clipped by an `overflow` ancestor (e.g. a scrollable modal body).

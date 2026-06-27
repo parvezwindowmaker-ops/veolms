@@ -10,7 +10,7 @@ export const MIN_PAID_PRICE = 100;
 
 /**
  * A course is free **only** when its price is exactly 0. Anything else (any
- * positive amount, or — defensively — a null/NaN that should never occur) is
+ * positive amount, or, defensively, a null/NaN that should never occur) is
  * treated as paid, so the free-enroll path fails closed.
  */
 export const isFreeCourse = (price: number): boolean =>

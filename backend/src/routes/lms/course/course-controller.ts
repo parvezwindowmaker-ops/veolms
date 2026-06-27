@@ -72,7 +72,7 @@ export const getCatalog = async (req: Request, res: Response): Promise<void> => 
   });
 };
 
-/** All courses (Admin) — global management view, any status. */
+/** All courses (Admin): the global management view, any status. */
 export const getAllCourses = async (
   req: Request,
   res: Response
@@ -159,7 +159,7 @@ export const getCourseById = async (
   // Decide whether the viewer may see protected lesson content. Owners/admins
   // always can; otherwise only if enrolled. Everyone else (anonymous visitors,
   // logged-in non-enrolled users) gets curriculum metadata + preview lessons
-  // only — the video source/notes of paid lessons are withheld so the catalog
+  // only. The video source/notes of paid lessons are withheld so the catalog
   // page can't be used to watch a course for free.
   let enrolled = false;
   if (!owner && req.user) {
@@ -263,7 +263,7 @@ export const updateCourse = async (
   if (price !== undefined) course.price = validateCoursePrice(price);
   await course.save();
 
-  // Replaced/removed image is now unreferenced — purge the old R2 object + row.
+  // Replaced/removed image is now unreferenced, so purge the old R2 object + row.
   if (
     previousAssetId &&
     previousAssetId !== course.thumbnailAssetId &&

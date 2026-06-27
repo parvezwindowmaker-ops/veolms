@@ -1,4 +1,4 @@
-# Root .gitignore — belt-and-suspenders for the whole monorepo.
+# Root .gitignore: belt-and-suspenders for the whole monorepo.
 # (backend/ and frontend/ have their own .gitignore too.)
 
 # Dependencies & build output
@@ -7,7 +7,7 @@
 **/dist-ssr/
 *.tsbuildinfo
 
-# Secrets / environment — NEVER commit real env files (commit .env.example only)
+# Secrets / environment: NEVER commit real env files (commit .env.example only)
 **/.env
 **/.env.*
 !**/.env.example

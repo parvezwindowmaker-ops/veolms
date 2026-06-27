@@ -101,7 +101,7 @@ export function NewCoursePage() {
               Create a course
             </h1>
             <p className="mt-1.5 font-medium text-muted-foreground">
-              Start with the basics — you can add sections, lessons and videos next.
+              Start with the basics. You can add sections, lessons, and videos next.
             </p>
           </div>
         </div>
@@ -198,7 +198,7 @@ export function NewCoursePage() {
                 }
               >
                 {isFree
-                  ? 'Free — anyone can enroll'
+                  ? 'Free, anyone can enroll'
                   : `Students pay ₹${rupees.toLocaleString('en-IN')} once`}
               </span>
             </div>

@@ -55,7 +55,7 @@ export function AdminLayout() {
 
   return (
     <div className="flex min-h-svh bg-background text-foreground">
-      {/* Sidebar — pinned full-height so it stays put while content scrolls */}
+      {/* Sidebar: pinned full-height so it stays put while content scrolls */}
       <aside className="sticky top-0 hidden h-svh w-64 shrink-0 flex-col self-start border-r-2 border-ink bg-card md:flex">
         {/* Brand */}
         <Link

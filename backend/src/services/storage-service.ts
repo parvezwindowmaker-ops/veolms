@@ -82,7 +82,7 @@ export async function putObject(
 
 /**
  * Presigned PUT URL so the client uploads directly to R2 (the app never proxies
- * file bytes — keeps it stateless and scalable). Short-lived.
+ * file bytes, which keeps it stateless and scalable). Short-lived.
  */
 export async function createUploadUrl(
   key: string,
@@ -147,7 +147,7 @@ export async function getObjectBuffer(key: string): Promise<Buffer> {
   return Buffer.from(bytes);
 }
 
-/** Presigned GET with an explicit TTL — e.g. long-lived HLS segment URLs. */
+/** Presigned GET with an explicit TTL (e.g. long-lived HLS segment URLs). */
 export async function signGetUrl(
   key: string,
   ttlSeconds: number

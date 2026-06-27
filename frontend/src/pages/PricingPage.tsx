@@ -64,7 +64,7 @@ const FAQ = [
   },
   {
     q: 'What payment methods are supported?',
-    a: 'Payments are handled securely through Razorpay — cards, UPI, net banking and more.',
+    a: 'Payments are handled securely through Razorpay, with support for cards, UPI, net banking, and more.',
   },
   {
     q: 'Do I keep access if I stop paying?',
@@ -113,7 +113,7 @@ export function PricingPage() {
           </h1>
           <p className="mx-auto mt-7 max-w-xl text-lg font-medium text-muted-foreground sm:text-xl">
             Pay once for the courses you want and own them forever. Start with our
-            free courses — no card required.
+            free courses, no card required.
           </p>
         </div>
       </section>

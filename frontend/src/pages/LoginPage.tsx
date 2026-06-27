@@ -13,7 +13,7 @@ export function LoginPage() {
   const location = useLocation()
   const [params] = useSearchParams()
   const from = (location.state as { from?: string } | null)?.from
-  // Arrived from a "teach" CTA — a Student logging in here wants to teach, so
+  // Arrived from a "teach" CTA: a Student logging in here wants to teach, so
   // send them to /teach to upgrade. Existing instructors/admins still go to /admin.
   const asInstructor = params.get('role') === 'instructor'
 
@@ -42,7 +42,7 @@ export function LoginPage() {
 
   return (
     <AuthShell>
-      {/* brand (mobile only — desktop has the side panel) */}
+      {/* brand (mobile only; desktop has the side panel) */}
       <Link
         to="/"
         className="mb-8 flex items-center justify-center gap-2.5 font-extrabold lg:hidden"

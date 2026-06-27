@@ -4,7 +4,7 @@ import { ApiError } from '../types/interface';
 
 /**
  * Razorpay integration. We talk to the Orders REST API directly (Basic auth)
- * instead of pulling in the SDK — it keeps the dependency surface small and the
+ * instead of pulling in the SDK. That keeps the dependency surface small and the
  * exact request/response easy to reason about. Signature verification is done
  * with Node's crypto (HMAC-SHA256), the same algorithm Razorpay documents.
  */
@@ -31,7 +31,7 @@ export interface RazorpayOrder {
 
 /**
  * Create a Razorpay order for `amount` (paise). The amount is always derived
- * server-side from the course price — never trusted from the client.
+ * server-side from the course price; the client value is never trusted.
  */
 export async function createOrder(params: {
   amount: number;
@@ -110,7 +110,7 @@ export function verifyPaymentSignature(
 /**
  * Verify a webhook payload signature:
  *   HMAC_SHA256(raw_request_body, webhook_secret) === X-Razorpay-Signature
- * The RAW request bytes must be used — re-serializing the parsed JSON would
+ * The RAW request bytes must be used, because re-serializing the parsed JSON would
  * change the bytes and break the signature.
  */
 export function verifyWebhookSignature(

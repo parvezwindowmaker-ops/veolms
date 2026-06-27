@@ -14,7 +14,7 @@ interface UploadUrlResponse {
 /**
  * Upload a video straight to R2 (the API never proxies the bytes):
  *   1. ask the API for a short-lived presigned PUT URL + assetId
- *   2. PUT the file directly to R2 (plain axios — no auth header / baseURL)
+ *   2. PUT the file directly to R2 (plain axios, no auth header / baseURL)
  *   3. confirm the upload so the asset is marked `ready`
  * Returns the assetId to attach to a lesson via `videoAssetId`.
  */
@@ -46,7 +46,7 @@ export async function uploadVideo(
 
 /**
  * Upload an image straight to R2 (same presigned-PUT flow as video) and return
- * the assetId — attach it to a course via `thumbnailAssetId`.
+ * the assetId, which you attach to a course via `thumbnailAssetId`.
  */
 export async function uploadImage(
   file: File,

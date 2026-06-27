@@ -145,7 +145,7 @@ const yt = (id: string): string => `https://www.youtube.com/watch?v=${id}`;
 
 /**
  * Seeded catalog. The video URLs are public tutorial videos used as
- * placeholders — replace them with your own (e.g. procodrr) clips from the
+ * placeholders; replace them with your own (e.g. procodrr) clips from the
  * admin panel. Every course is published with sections, video + text lessons,
  * and a free preview lesson.
  */

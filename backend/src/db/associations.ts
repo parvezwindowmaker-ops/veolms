@@ -76,7 +76,7 @@ export function defineAssociations(): void {
 
   // Payments (purchase records). Mirror the enrollment lifecycle: removing a
   // user/course removes their payment rows too. (A production system would
-  // soft-delete to preserve the financial audit trail — documented tradeoff.)
+  // soft-delete to preserve the financial audit trail; documented tradeoff.)
   User.hasMany(Payment, { foreignKey: 'userId', onDelete: 'CASCADE' });
   Payment.belongsTo(User, { foreignKey: 'userId', as: 'user' });
   Course.hasMany(Payment, { foreignKey: 'courseId', as: 'payments', onDelete: 'CASCADE' });

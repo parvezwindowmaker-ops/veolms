@@ -68,7 +68,7 @@ async function uploadAvatar(
     });
     return asset.id;
   } catch (err) {
-    // The object is uploaded but the row failed — delete the object so it isn't
+    // The object is uploaded but the row failed, so delete the object so it isn't
     // an untracked orphan, then surface the error.
     await deleteObject(key).catch(() => undefined);
     throw err;
@@ -197,7 +197,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
 /**
  * Self-serve upgrade: a logged-in **Student** opts into teaching and becomes an
- * **Instructor**. Hardened against privilege escalation — the target role is
+ * **Instructor**. Hardened against privilege escalation: the target role is
  * hardcoded to Instructor (never read from the client, never Admin), and we only
  * ever promote a Student. Because the role lives in the JWT, we re-issue a fresh
  * token so the new permissions take effect immediately.
@@ -226,7 +226,7 @@ export const becomeInstructor = async (
     throw new ApiError(500, 'Instructor role is not configured');
   }
 
-  user.roleId = instructorRole.id; // only roleId changes — password hook won't run
+  user.roleId = instructorRole.id; // only roleId changes, so the password hook won't run
   await user.save();
 
   const payload: JwtPayload = {
@@ -410,7 +410,7 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
     throw err;
   }
 
-  // Replaced avatar is now unreferenced — best-effort purge (must not fail the request).
+  // Replaced avatar is now unreferenced. Best-effort purge (must not fail the request).
   if (
     newAvatarAssetId !== null &&
     oldAvatarAssetId &&
@@ -441,7 +441,7 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
     throw new ApiError(404, 'No User Found');
   }
 
-  // Decide which assets are safe to purge BEFORE removing the user — never delete
+  // Decide which assets are safe to purge BEFORE removing the user; never delete
   // an object still referenced by another user/lesson.
   const purgeIds: number[] = [];
 

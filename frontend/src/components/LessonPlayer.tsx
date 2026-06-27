@@ -18,7 +18,7 @@ export interface LessonPlayerProps {
 const FRAME =
   'aspect-video w-full overflow-hidden rounded-2xl border-2 border-foreground bg-black'
 
-/** YouTube playback via the IFrame API — enables resume + progress + completion. */
+/** YouTube playback via the IFrame API, which enables resume + progress + completion. */
 function YouTubePlayer({
   videoId,
   startAt = 0,

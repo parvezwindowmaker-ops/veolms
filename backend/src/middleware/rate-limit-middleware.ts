@@ -20,7 +20,7 @@ export const paymentLimiter = rateLimit({
   message: { message: 'Too many payment requests. Please try again shortly.' },
 });
 
-/** Public, unauthenticated (HMAC-gated) webhook — backstop before the HMAC check. */
+/** Public, unauthenticated (HMAC-gated) webhook; backstop before the HMAC check. */
 export const webhookLimiter = rateLimit({
   ...common,
   windowMs: 60_000,
@@ -28,7 +28,7 @@ export const webhookLimiter = rateLimit({
   message: { message: 'Too many requests.' },
 });
 
-/** Auth endpoints (login) — slow down credential brute-forcing. */
+/** Auth endpoints (login): slow down credential brute-forcing. */
 export const authLimiter = rateLimit({
   ...common,
   windowMs: 15 * 60_000, // 15 minutes

@@ -74,7 +74,7 @@ export function ThumbnailField({
       const assetId = await uploadImage(file, null, setProgress)
       onChange({ assetId, url: '' })
     } catch (e) {
-      setError(apiErrorMessage(e, 'Upload failed — please try again'))
+      setError(apiErrorMessage(e, 'Upload failed. Please try again.'))
       setLocalPreview(null)
     } finally {
       setUploading(false)

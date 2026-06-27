@@ -134,7 +134,7 @@ export const confirmUpload = async (
  * Serve the HLS playlist for a video asset, rewritten on the fly: the AES key URI
  * points at the gated key endpoint (carrying the same ticket) and each segment
  * becomes a short-lived presigned R2 URL. Authorized by the ticket only (so it
- * works with native HLS and hls.js alike) — no JWT header needed.
+ * works with native HLS and hls.js alike); no JWT header needed.
  */
 export const hlsPlaylist = async (req: Request, res: Response): Promise<void> => {
   const assetId = parseId(req.params.assetId, 'assetId');
@@ -142,7 +142,7 @@ export const hlsPlaylist = async (req: Request, res: Response): Promise<void> =>
   if (!verifyHlsTicket(ticket, assetId)) {
     throw new ApiError(403, 'Invalid or expired playback ticket');
   }
-  // Which playlist (master or a variant). Strict whitelist — no path traversal.
+  // Which playlist (master or a variant). Strict whitelist prevents path traversal.
   const p = String(req.query.p ?? 'master.m3u8');
   if (!/^[A-Za-z0-9_.-]+\.m3u8$/.test(p)) {
     throw new ApiError(400, 'Invalid playlist name');

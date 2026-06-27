@@ -44,7 +44,7 @@ export function SignupPage() {
           await becomeInstructor()
           navigate('/admin', { replace: true })
         } catch {
-          // Account was created (as a Student) but the upgrade failed — send them
+          // Account was created (as a Student) but the upgrade failed, so send them
           // to the Teach page where they can retry becoming an instructor.
           navigate('/teach', { replace: true })
         }
@@ -60,7 +60,7 @@ export function SignupPage() {
 
   return (
     <AuthShell>
-      {/* brand (mobile only — desktop has the side panel) */}
+      {/* brand (mobile only; desktop has the side panel) */}
       <Link
         to="/"
         className="mb-8 flex items-center justify-center gap-2.5 font-extrabold lg:hidden"

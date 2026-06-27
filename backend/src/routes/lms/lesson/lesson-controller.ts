@@ -267,7 +267,7 @@ export const getLessonPlayback = async (
     if (!asset) {
       throw new ApiError(409, 'Video is not ready');
     }
-    // Preferred: AES-128 encrypted HLS — playlist + key are ticket-gated and the
+    // Preferred: AES-128 encrypted HLS, where playlist + key are ticket-gated and the
     // raw file is gone, so there's no single downloadable video in the Network tab.
     if (asset.hlsStatus === 'ready') {
       const ticket = issueHlsTicket(asset.id, req.user!.id);

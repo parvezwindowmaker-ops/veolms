@@ -80,7 +80,7 @@ function QuickAction({
 const STEPS = [
   'Create a course',
   'Add sections & lessons',
-  'Set a price — or make it free',
+  'Set a price, or make it free',
   'Add a cover image, then Publish',
 ]
 

@@ -55,7 +55,7 @@ async function fulfillPayment(
       });
     } catch (err) {
       if (!(err instanceof UniqueConstraintError)) throw err;
-      // Already enrolled (concurrent fulfillment) — the entitlement exists.
+      // Already enrolled from a concurrent fulfillment, so the entitlement exists.
     }
   });
 }
@@ -100,7 +100,7 @@ export const createPaymentOrder = async (
   }
 
   // Entitlement is perpetual: if this user already paid for the course (e.g.
-  // unenrolled and came back), re-grant access for free — never charge twice.
+  // unenrolled and came back), re-grant access for free; never charge twice.
   const paid = await Payment.findOne({
     where: { userId, courseId: cid, status: 'paid' },
   });
@@ -143,7 +143,7 @@ export const createPaymentOrder = async (
 
   const receipt = `rcpt_${cid}_${userId}_${Date.now().toString(36)}`.slice(0, 40);
   const order = await createOrder({
-    amount: course.price, // paise, server-derived — never from the client
+    amount: course.price, // paise, derived on the server; never sent by the client
     currency: course.currency,
     receipt,
     notes: { courseId: String(cid), userId: String(userId) },
@@ -173,7 +173,7 @@ export const createPaymentOrder = async (
 
 /**
  * Verify a checkout callback signature and, if valid, grant enrollment.
- * The amount is never read from the client — only the signature is checked,
+ * The amount is never read from the client: only the signature is checked,
  * and the order was created server-side at the course's price.
  */
 export const verifyPayment = async (
@@ -186,7 +186,7 @@ export const verifyPayment = async (
     razorpay_signature: signature,
   } = req.body ?? {};
 
-  // These come straight from parsed JSON — validate they are strings (and a
+  // These come straight from parsed JSON, so validate they are strings (and a
   // sane length) before they reach the DB lookup or the HMAC.
   if (
     typeof orderId !== 'string' ||
@@ -209,7 +209,7 @@ export const verifyPayment = async (
 
   if (!verifyPaymentSignature(orderId, paymentId, signature)) {
     // Conditional update so a bad-signature attempt can only move a still-open
-    // order to `failed` — it can never regress a webhook-confirmed `paid` row.
+    // order to `failed`; it can never regress a webhook-confirmed `paid` row.
     await Payment.update(
       { status: 'failed' },
       { where: { id: payment.id, status: 'created' } }
@@ -238,7 +238,7 @@ export const paymentWebhook = async (
     throw new ApiError(503, 'Webhooks are not configured');
   }
 
-  // The raw parser (app.ts) must have captured the body as a Buffer — the HMAC
+  // The raw parser (app.ts) must have captured the body as a Buffer, since the HMAC
   // is computed over the exact bytes Razorpay sent. Fail loud on a
   // misconfiguration rather than silently HMAC-ing re-serialized JSON.
   if (!Buffer.isBuffer(req.body)) {
@@ -298,7 +298,7 @@ export const myPayments = async (
   res.status(200).json({ data: payments, message: 'Payments fetched' });
 };
 
-/** All payments (Admin) — revenue / sales view for the admin dashboard. */
+/** All payments (Admin). Powers the revenue/sales view on the admin dashboard. */
 export const allPayments = async (
   _req: Request,
   res: Response

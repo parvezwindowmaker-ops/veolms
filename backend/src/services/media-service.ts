@@ -41,7 +41,7 @@ export async function purgeAsset(asset: MediaAsset | null): Promise<void> {
     }
   }
 
-  // Object not deleted — retain the row (with its key) for later reclaim.
+  // Object not deleted, so retain the row (with its key) for later reclaim.
   try {
     asset.status = 'orphaned';
     await asset.save();
@@ -78,7 +78,7 @@ export async function assetReferenceCount(assetId: number): Promise<number> {
 }
 
 /**
- * Remove `pending` assets older than `hours` — abandoned uploads where the
+ * Remove `pending` assets older than `hours`: abandoned uploads where the
  * client requested an upload URL but never confirmed. Returns the count removed.
  */
 export async function cleanupStalePending(hours: number): Promise<number> {

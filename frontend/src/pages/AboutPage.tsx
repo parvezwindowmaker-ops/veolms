@@ -66,7 +66,7 @@ export function AboutPage() {
             what they start.
           </h1>
           <p className="mx-auto mt-7 max-w-xl text-lg font-medium text-muted-foreground sm:text-xl">
-            VeoLMS is a home for bite-sized, project-based video courses — built so
+            VeoLMS is a home for bite-sized, project-based video courses, built so
             learning sticks and you walk away having actually built something.
           </p>
         </div>
@@ -81,7 +81,7 @@ export function AboutPage() {
         <div className="mt-6 space-y-4 text-lg font-medium leading-relaxed text-muted-foreground">
           <p>
             Most online courses are too long, too passive, and too easy to abandon.
-            We started VeoLMS to fix that — with short lessons, real projects, and a
+            We started VeoLMS to fix that, with short lessons, real projects, and a
             player that remembers exactly where you left off.
           </p>
           <p>

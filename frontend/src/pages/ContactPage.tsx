@@ -31,7 +31,7 @@ export function ContactPage() {
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault()
-    // Front-end only — wire this to a real endpoint when one exists.
+    // Front-end only. Wire this to a real endpoint when one exists.
     setSent(true)
   }
 
@@ -85,7 +85,7 @@ export function ContactPage() {
               We&apos;re here to help
             </h2>
             <p className="mt-3 font-medium text-muted-foreground">
-              Pick whatever works best — we read everything that comes in.
+              Pick whatever works best. We read everything that comes in.
             </p>
             <div className="mt-8 space-y-4">
               {INFO.map(({ icon: Icon, color, title, value }) => (
@@ -119,7 +119,7 @@ export function ContactPage() {
                     Message sent!
                   </h3>
                   <p className="mt-2 font-medium text-muted-foreground">
-                    Thanks for reaching out — we&apos;ll get back to you soon.
+                    Thanks for reaching out. We&apos;ll get back to you soon.
                   </p>
                   <Button
                     variant="outline"
