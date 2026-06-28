@@ -17,7 +17,7 @@ export default defineConfig({
     // deployed backend instead.
     proxy: {
       '/api': {
-        target: 'http://localhost:5005',
+        target: 'https://ptmsoftware.me/veolms-api',
         changeOrigin: true,
       },
     },
