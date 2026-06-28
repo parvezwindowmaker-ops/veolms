@@ -1,9 +1,9 @@
 /**
  * DESTRUCTIVE reset — wipes ALL application data for a clean start.
  *
- *   1. Drops every table + enum type in the Postgres `public` schema. The app
- *      recreates the schema via `sequelize.sync()` and reseeds (roles, menus,
- *      demo catalog) on the next start, since the DB is then empty.
+ *   1. Drops every table + enum type in the Postgres `public` schema, then
+ *      immediately recreates the schema (sequelize.sync) and reseeds (roles,
+ *      menus, demo catalog) — same as a normal app boot, so no restart needed.
  *   2. Deletes every object under the app's R2 prefixes.
  *
  * It reads the SAME config the app uses (config/env.ts), so it always targets
@@ -18,6 +18,7 @@
  * The `--yes` flag (or CONFIRM=1) is required so it can never run by accident.
  */
 import { sequelize } from '../db/sequelize';
+import connectDB from '../db/connection';
 import { env } from '../config/env';
 import { isStorageConfigured, deletePrefix } from '../services/storage-service';
 
@@ -46,7 +47,19 @@ async function wipeDatabase(): Promise<void> {
       END LOOP;
     END $$;
   `);
-  console.log('[db]  done — schema is empty (the app recreates + reseeds on next start).');
+  console.log('[db]  dropped.');
+}
+
+/**
+ * Recreate the schema and reseed, exactly like a normal app boot: connectDB()
+ * wires associations, runs sequelize.sync() (creates the now-missing tables),
+ * and seeds baseline data since the DB is empty. So no container restart is
+ * needed after a reset — the DB is left ready to use.
+ */
+async function recreateDatabase(): Promise<void> {
+  console.log('\n[db]  Recreating schema + seeding ...');
+  await connectDB();
+  console.log('[db]  schema recreated and seeded.');
 }
 
 async function wipeR2(): Promise<void> {
@@ -77,8 +90,9 @@ async function main(): Promise<void> {
 
   try {
     await wipeDatabase();
+    await recreateDatabase();
     await wipeR2();
-    console.log('\n✓ Clean. Start the backend to recreate the schema and reseed.\n');
+    console.log('\n✓ Clean, schema recreated, and reseeded — no restart needed.\n');
   } catch (err) {
     console.error('\n✗ Reset failed:', (err as Error).message);
     process.exitCode = 1;
