@@ -88,8 +88,8 @@ Instructor-led catalog. Same entity-triad convention as the admin panel. Domain:
   key. Residual: within the ticket window an enrolled user could still script ffmpeg, and
   screen-capture always works, and true DRM (Widevine/FairPlay) is the only full stop.
   **ffmpeg must be on PATH** (added to the Dockerfile); transcode is graceful (failure →
-  `hlsStatus='failed'` → MP4 fallback). **R2 bucket CORS must allow GET** from the
-  frontend origin (hls.js fetches segments cross-origin).
+  `hlsStatus='failed'` → MP4 fallback). **R2 bucket CORS must allow `PUT` (browser
+  uploads) and `GET` (hls.js segments)** from the SPA origin, plus the `content-type` header.
 - R2 is **optional** for the app to boot, but it's **required for any video**: if
   unconfigured (`env.r2.configured === false`), media + video-playback endpoints return
   **503** and only text lessons work (there's no external-URL fallback anymore). Don't

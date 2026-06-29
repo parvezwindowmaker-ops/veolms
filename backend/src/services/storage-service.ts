@@ -28,6 +28,16 @@ function getClient(): S3Client {
         accessKeyId: env.r2.accessKeyId,
         secretAccessKey: env.r2.secretAccessKey,
       },
+      // The AWS SDK defaults requestChecksumCalculation to 'WHEN_SUPPORTED',
+      // which makes PutObject inject a CRC32 integrity checksum. When presigning
+      // (there is no body yet) it bakes the checksum of an EMPTY body into the
+      // signed query (x-amz-checksum-crc32); R2 then rejects it against the real
+      // uploaded bytes, and the browser surfaces that failed request as a CORS
+      // error. 'WHEN_REQUIRED' stops the injection so presigned PUTs stay clean
+      // and R2 accepts the upload. The response setting likewise keeps presigned
+      // GET (playback) URLs free of a baked-in x-amz-checksum-mode.
+      requestChecksumCalculation: 'WHEN_REQUIRED',
+      responseChecksumValidation: 'WHEN_REQUIRED',
     });
   }
   return client;

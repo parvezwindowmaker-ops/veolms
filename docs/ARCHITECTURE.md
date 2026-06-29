@@ -170,7 +170,7 @@ In the browser Network tab, segments are AES-encrypted blobs and the decryption 
 
 **This is not DRM.** Within the ticket window an enrolled, determined user could script ffmpeg to reassemble the stream, and screen capture defeats any web player. True device DRM (Widevine/FairPlay) is the only full stop; the trade-off is discussed in [CHALLENGES.md](CHALLENGES.md).
 
-The R2 bucket must allow cross-origin GET from the frontend origin, because hls.js fetches the presigned segment URLs directly from R2.
+The R2 bucket CORS policy must allow cross-origin `PUT` (browser direct-to-R2 uploads) and `GET` (hls.js fetching the presigned segment URLs) from the SPA origin, plus the `content-type` request header. The HLS playlist and AES key come from the API, so only segment GETs and uploads hit R2 cross-origin.
 
 ---
 

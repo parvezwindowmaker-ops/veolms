@@ -154,8 +154,8 @@ URLs are short-lived presigned R2 and the key URI points at the gated key endpoi
 `GET /media/hls/:id/key?ticket=`. In the Network tab the segments are AES-encrypted and
 unusable without the ticket-gated key. **hls.js** does adaptive bitrate automatically and
 the player offers a **quality selector** (Auto + each rendition). Requires **ffmpeg** in
-the image (in the Dockerfile) and an **R2 bucket CORS** rule allowing `GET` from the
-frontend origin (hls.js fetches segments cross-origin). If ffmpeg is unavailable the
+the image (in the Dockerfile) and an **R2 bucket CORS** rule allowing `PUT` (browser
+direct-to-R2 uploads) and `GET` (hls.js fetches segments) from the SPA origin. If ffmpeg is unavailable the
 transcode fails gracefully and playback falls back to a presigned MP4.
 
 If R2 env vars are unset, media and video-playback endpoints return `503`; only text
