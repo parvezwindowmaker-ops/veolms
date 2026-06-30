@@ -21,8 +21,10 @@ export function Navbar() {
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     cn(
-      'text-sm font-medium transition-colors hover:text-foreground',
-      isActive ? 'text-foreground' : 'text-muted-foreground'
+      'inline-flex h-9 items-center justify-center rounded-full px-4 text-sm font-semibold transition-all border-2',
+      isActive
+        ? 'bg-primary text-primary-foreground border-ink shadow-[2px_3px_0_var(--ink)]'
+        : 'border-transparent text-muted-foreground hover:bg-accent/80 hover:text-foreground'
     )
 
   const links = (
@@ -67,7 +69,7 @@ export function Navbar() {
           <span className="text-lg tracking-tight">VeoLMS</span>
         </Link>
 
-        <nav className="hidden items-center gap-6 md:flex">{links}</nav>
+        <nav className="hidden items-center gap-2 md:flex">{links}</nav>
 
         <div className="flex items-center gap-2">
           {isAuthenticated ? (
