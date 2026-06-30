@@ -12,6 +12,7 @@ import {
   Clock,
   Globe,
   CalendarDays,
+  Loader2,
 } from 'lucide-react'
 import { useCourseDetail } from '@/features/courses/detail'
 import { useMyEnrollments, useCheckout } from '@/features/enrollment/api'
@@ -20,6 +21,7 @@ import { apiErrorMessage } from '@/lib/api'
 import { formatPrice } from '@/lib/utils'
 import { formatDuration } from '@/lib/video'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Modal } from '@/components/ui/modal'
 import { LessonPlayer } from '@/components/LessonPlayer'
 import { usePlayback } from '@/features/learn/api'
@@ -269,16 +271,25 @@ export function CourseDetailPage() {
                 )}
               </div>
               <div className="space-y-4 p-5">
-                <div className="flex items-baseline gap-2">
-                  <p className="text-3xl font-extrabold tracking-tight text-primary-strong">
-                    {isFree ? 'Free' : formatPrice(effectivePrice, course.currency)}
-                  </p>
-                  {hasDiscount && (
-                    <p className="text-lg font-semibold text-muted-foreground line-through">
-                      {formatPrice(course.price, course.currency)}
+                {/* Already owns it: show an enrolled state, not a price (the owner/
+                    admin still sees the price, since it's their course's listing). */}
+                {enrolled && !canManage ? (
+                  <Badge tone="success">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    {isFree ? 'Enrolled' : 'Purchased'} · full access
+                  </Badge>
+                ) : (
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-3xl font-extrabold tracking-tight text-primary-strong">
+                      {isFree ? 'Free' : formatPrice(effectivePrice, course.currency)}
                     </p>
-                  )}
-                </div>
+                    {hasDiscount && (
+                      <p className="text-lg font-semibold text-muted-foreground line-through">
+                        {formatPrice(course.price, course.currency)}
+                      </p>
+                    )}
+                  </div>
+                )}
                 <PurchaseCTA />
                 {error && (
                   <p className="rounded-xl bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
@@ -405,7 +416,8 @@ function PreviewPlayer({ lessonId }: { lessonId: number }) {
 
   if (playback.isLoading) {
     return (
-      <div className="pop flex aspect-video w-full items-center justify-center bg-tint text-sm font-semibold text-muted-foreground">
+      <div className="pop flex aspect-video w-full flex-col items-center justify-center gap-3 bg-tint text-sm font-semibold text-muted-foreground">
+        <Loader2 className="h-8 w-8 animate-spin" />
         Loading preview…
       </div>
     )

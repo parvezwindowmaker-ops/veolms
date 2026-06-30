@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { CheckCircle2, Circle, Video, FileText, ArrowLeft } from 'lucide-react'
+import { CheckCircle2, Circle, Video, FileText, ArrowLeft, Loader2 } from 'lucide-react'
 import { useCourseDetail } from '@/features/courses/detail'
 import {
   useCourseProgress,
@@ -97,7 +97,8 @@ export function LearnPage() {
         <div className="mt-3">
           {current?.type === 'video' ? (
             playback.isLoading ? (
-              <div className="pop flex aspect-video w-full items-center justify-center bg-tint text-sm font-semibold text-muted-foreground">
+              <div className="pop flex aspect-video w-full flex-col items-center justify-center gap-3 bg-tint text-sm font-semibold text-muted-foreground">
+                <Loader2 className="h-8 w-8 animate-spin" />
                 Loading video…
               </div>
             ) : playback.data ? (

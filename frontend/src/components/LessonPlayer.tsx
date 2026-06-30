@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
-import { Maximize, PictureInPicture2 } from 'lucide-react'
+import { Loader2, Maximize, PictureInPicture2 } from 'lucide-react'
 import type HlsJs from 'hls.js'
 import { cn } from '@/lib/utils'
 
@@ -31,6 +31,7 @@ function NativeVideoPlayer({
   const [rate, setRate] = useState(1)
   const [levels, setLevels] = useState<{ height: number; index: number }[]>([])
   const [level, setLevel] = useState(-1) // -1 = Auto (adaptive)
+  const [loading, setLoading] = useState(true) // white spinner over the black frame until playable
 
   // Attach hls.js for encrypted-HLS streams (lazy-loaded; native HLS on Safari
   // is the fallback). Dynamic import keeps hls.js out of the main bundle. hls.js
@@ -66,6 +67,11 @@ function NativeVideoPlayer({
       setLevel(-1)
     }
   }, [url, isHls])
+
+  // Reset the loading overlay whenever the source changes (new lesson/quality).
+  useEffect(() => {
+    setLoading(true)
+  }, [url])
 
   const changeQuality = (idx: number) => {
     setLevel(idx)
@@ -104,17 +110,26 @@ function NativeVideoPlayer({
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     const v = ref.current
     if (!v) return
+    // The native <video controls> already handles Space/arrows/m/f when it has
+    // focus; running ours too would double-fire and cancel out (which is why
+    // Space looked broken). For those keys, only act when the wrapper itself is
+    // focused. Keys the native UI doesn't bind (k, j, l) are always safe.
+    const onWrapper = e.target === e.currentTarget
     switch (e.key) {
       case ' ':
+        if (!onWrapper) return
+        e.preventDefault()
+        togglePlay()
+        break
       case 'k':
         e.preventDefault()
         togglePlay()
         break
       case 'ArrowRight':
-        seekBy(5)
+        if (onWrapper) seekBy(5)
         break
       case 'ArrowLeft':
-        seekBy(-5)
+        if (onWrapper) seekBy(-5)
         break
       case 'l':
         seekBy(10)
@@ -123,38 +138,50 @@ function NativeVideoPlayer({
         seekBy(-10)
         break
       case 'm':
-        v.muted = !v.muted
+        if (onWrapper) v.muted = !v.muted
         break
       case 'f':
-        toggleFullscreen()
+        if (onWrapper) toggleFullscreen()
         break
     }
   }
 
   return (
     <div className="group" tabIndex={0} onKeyDown={onKeyDown}>
-      <video
-        ref={ref}
-        src={isHls ? undefined : url}
-        controls
-        playsInline
-        controlsList="nodownload"
-        className={FRAME}
-        onLoadedMetadata={() => {
-          const v = ref.current
-          if (v && startAt > 5 && startAt < v.duration - 5) v.currentTime = startAt
-        }}
-        onTimeUpdate={() => {
-          const v = ref.current
-          if (!v) return
-          const t = Math.floor(v.currentTime)
-          if (t - lastSaved.current >= 10) {
-            lastSaved.current = t
-            onProgress?.(t)
-          }
-        }}
-        onEnded={() => onEnded?.()}
-      />
+      <div className="relative">
+        <video
+          ref={ref}
+          src={isHls ? undefined : url}
+          controls
+          playsInline
+          controlsList="nodownload"
+          className={FRAME}
+          onLoadedMetadata={() => {
+            const v = ref.current
+            if (v && startAt > 5 && startAt < v.duration - 5) v.currentTime = startAt
+          }}
+          onCanPlay={() => setLoading(false)}
+          onPlaying={() => setLoading(false)}
+          onWaiting={() => setLoading(true)}
+          onTimeUpdate={() => {
+            const v = ref.current
+            if (!v) return
+            const t = Math.floor(v.currentTime)
+            if (t - lastSaved.current >= 10) {
+              lastSaved.current = t
+              onProgress?.(t)
+            }
+          }}
+          onEnded={() => onEnded?.()}
+        />
+        {/* White spinner over the black video frame while it buffers, so it's
+            visible (the native browser spinner is dark and gets lost). */}
+        {loading && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <Loader2 className="h-10 w-10 animate-spin text-white/90" />
+          </div>
+        )}
+      </div>
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <span className="eyebrow mr-1">Speed</span>
         {[0.5, 1, 1.5, 2].map((r) => (

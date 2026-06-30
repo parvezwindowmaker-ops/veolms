@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
-import { PlayCircle, Users, BookOpen } from 'lucide-react'
+import { PlayCircle, Users, BookOpen, CheckCircle2 } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { useMyEnrollments } from '@/features/enrollment/api'
 import type { Course } from '@/types'
 
 // Varied gradient covers so a thumbnail-less catalog stays colorful, not monotone.
@@ -36,6 +37,12 @@ export function CourseCard({ course }: { course: Course }) {
   const isFree = !course.price || course.price <= 0
   const hasDiscount =
     !isFree && course.discountPrice != null && course.discountPrice < course.price
+  // Already-enrolled courses show an "Enrolled" state instead of a price/buy CTA.
+  // isEnrolled is only set on the detail endpoint, so fall back to the (shared,
+  // cached) enrollment list for catalog cards.
+  const { data: enrollments } = useMyEnrollments()
+  const enrolled =
+    course.isEnrolled ?? enrollments?.some((e) => e.courseId === course.id) ?? false
   const cover = coverFor(String(course.id ?? course.title))
   const initial = course.title?.trim().charAt(0).toUpperCase() || 'V'
   const students = course.studentCount ?? 0
@@ -72,7 +79,11 @@ export function CourseCard({ course }: { course: Course }) {
             {course.category.name}
           </span>
         )}
-        {isFree ? (
+        {enrolled ? (
+          <span className="tag absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-teal px-2.5 py-1 text-xs font-bold text-white">
+            <CheckCircle2 className="h-3.5 w-3.5" /> Enrolled
+          </span>
+        ) : isFree ? (
           <span className="tag absolute right-3 top-3 rounded-full bg-amber px-2.5 py-1 text-xs font-bold text-ink">
             Free
           </span>
@@ -109,24 +120,36 @@ export function CourseCard({ course }: { course: Course }) {
         </div>
 
         <div className="mt-auto border-t-2 border-dashed border-border pt-3">
-          <div className="flex items-baseline gap-2">
-            <span className="font-grotesk text-base font-extrabold text-primary-strong">
-              {isFree ? 'Free' : formatPrice(hasDiscount ? course.discountPrice! : course.price, course.currency)}
-            </span>
-            {hasDiscount && (
-              <span className="text-sm font-semibold text-muted-foreground line-through">
-                {formatPrice(course.price, course.currency)}
-              </span>
-            )}
-          </div>
-          <div className="mt-3 flex items-center gap-2">
-            <Button variant="outline" size="sm" asChild className="flex-1">
-              <Link to={to}>Preview</Link>
+          {enrolled ? (
+            // Owned: no price/buy CTA, just a way back into the course.
+            <Button size="sm" asChild className="w-full">
+              <Link to={`/learn/${course.id}`}>
+                <PlayCircle className="h-4 w-4" />
+                Go to course
+              </Link>
             </Button>
-            <Button size="sm" asChild className="flex-1">
-              <Link to={to}>{isFree ? 'Enroll' : 'Buy now'}</Link>
-            </Button>
-          </div>
+          ) : (
+            <>
+              <div className="flex items-baseline gap-2">
+                <span className="font-grotesk text-base font-extrabold text-primary-strong">
+                  {isFree ? 'Free' : formatPrice(hasDiscount ? course.discountPrice! : course.price, course.currency)}
+                </span>
+                {hasDiscount && (
+                  <span className="text-sm font-semibold text-muted-foreground line-through">
+                    {formatPrice(course.price, course.currency)}
+                  </span>
+                )}
+              </div>
+              <div className="mt-3 flex items-center gap-2">
+                <Button variant="outline" size="sm" asChild className="flex-1">
+                  <Link to={to}>Preview</Link>
+                </Button>
+                <Button size="sm" asChild className="flex-1">
+                  <Link to={to}>{isFree ? 'Enroll' : 'Buy now'}</Link>
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </article>
