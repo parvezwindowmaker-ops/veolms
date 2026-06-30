@@ -32,10 +32,19 @@ export function MyLearningPage() {
   const list = enrollments ?? []
   const recentList = recent ?? []
 
+  // Prefer a genuinely in-progress course for "Continue learning"; only fall back
+  // to a started/active/any course (which may be 100% complete) when none exist.
   const continueCourse =
+    list.find(
+      (e) =>
+        e.status === 'active' &&
+        (e.progress?.percent ?? 0) > 0 &&
+        (e.progress?.percent ?? 0) < 100
+    ) ??
     list.find((e) => e.status === 'active' && (e.progress?.percent ?? 0) > 0) ??
     list.find((e) => e.status === 'active') ??
     list[0]
+  const continueDone = (continueCourse?.progress?.percent ?? 0) === 100
 
   const completed = list.filter((e) => (e.progress?.percent ?? 0) === 100).length
 
@@ -110,7 +119,7 @@ export function MyLearningPage() {
                     <h3 className="line-clamp-2 font-bold leading-snug">{r.lessonTitle}</h3>
                     <Button asChild size="sm" variant="outline" className="mt-auto w-full">
                       <Link to={`/learn/${r.courseId}`}>
-                        <PlayCircle className="h-4 w-4" /> Resume
+                        <PlayCircle className="h-4 w-4" /> {r.completed ? 'Review' : 'Resume'}
                       </Link>
                     </Button>
                   </article>
@@ -139,9 +148,14 @@ export function MyLearningPage() {
                     {continueCourse.progress?.completed ?? 0} of{' '}
                     {continueCourse.progress?.total ?? 0} lessons complete
                   </p>
-                  <Button asChild className="mt-1 w-fit">
+                  <Button
+                    asChild
+                    variant={continueDone ? 'outline' : 'default'}
+                    className="mt-1 w-fit"
+                  >
                     <Link to={`/learn/${continueCourse.courseId}`}>
-                      <PlayCircle className="h-4 w-4" /> Resume course
+                      <PlayCircle className="h-4 w-4" />{' '}
+                      {continueDone ? 'Review course' : 'Resume course'}
                     </Link>
                   </Button>
                 </div>

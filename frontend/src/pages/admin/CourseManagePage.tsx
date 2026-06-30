@@ -1,7 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
-  ArrowLeft,
   Plus,
   Trash2,
   Pencil,
@@ -27,6 +26,7 @@ import { useReorderSections, useReorderLessons } from '@/features/admin/api'
 import { apiErrorMessage } from '@/lib/api'
 import { formatPrice } from '@/lib/utils'
 import { Decor } from '@/components/layout/Decor'
+import { BackLink } from '@/components/BackLink'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -138,12 +138,7 @@ export function CourseManagePage() {
 
   return (
     <div className="space-y-6">
-      <Button variant="ghost" size="sm" asChild>
-        <Link to="/admin/courses">
-          <ArrowLeft className="h-4 w-4" />
-          Back to courses
-        </Link>
-      </Button>
+      <BackLink to="/admin/courses">Back to courses</BackLink>
 
       {/* Header */}
       <div className="pop relative p-6">

@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, IndianRupee, Sparkles } from 'lucide-react'
+import { IndianRupee, Sparkles } from 'lucide-react'
+import { BackLink } from '@/components/BackLink'
 import { useCreateCourse } from '@/features/admin/api'
 import { useCategories } from '@/features/courses/api'
 import { apiErrorMessage } from '@/lib/api'
@@ -132,12 +133,7 @@ export function NewCoursePage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <Button variant="ghost" size="sm" asChild className="mb-5">
-        <Link to="/admin/courses">
-          <ArrowLeft className="h-4 w-4" />
-          Back to courses
-        </Link>
-      </Button>
+      <BackLink to="/admin/courses" className="mb-5">Back to courses</BackLink>
 
       {/* Header */}
       <div className="relative mb-6">

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { CheckCircle2, Circle, Video, FileText, ArrowLeft, Loader2 } from 'lucide-react'
+import { CheckCircle2, Circle, Video, FileText, Loader2 } from 'lucide-react'
+import { BackLink } from '@/components/BackLink'
 import { useCourseDetail } from '@/features/courses/detail'
 import {
   useCourseProgress,
@@ -86,13 +87,7 @@ export function LearnPage() {
     <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row lg:px-8">
       {/* Main */}
       <div className="min-w-0 flex-1">
-        <Link
-          to={`/courses/${courseId}`}
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-primary"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          {course.title}
-        </Link>
+        <BackLink to={`/courses/${courseId}`}>{course.title}</BackLink>
 
         <div className="mt-3">
           {current?.type === 'video' ? (

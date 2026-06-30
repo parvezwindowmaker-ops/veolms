@@ -22,6 +22,7 @@ import { formatPrice } from '@/lib/utils'
 import { formatDuration } from '@/lib/video'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { BackLink } from '@/components/BackLink'
 import { Modal } from '@/components/ui/modal'
 import { LessonPlayer } from '@/components/LessonPlayer'
 import { usePlayback } from '@/features/learn/api'
@@ -154,12 +155,7 @@ export function CourseDetailPage() {
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-3 lg:px-8 lg:py-16">
           {/* Left: info */}
           <div className="lg:col-span-2">
-            <Link
-              to="/courses"
-              className="font-grotesk text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              ← All courses
-            </Link>
+            <BackLink to="/courses">All courses</BackLink>
             <h1 className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl">
               {course.title}
             </h1>
