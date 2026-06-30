@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Target, Sparkles, IndianRupee, Users, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useAuth } from '@/context/AuthContext'
 
 const VALUES = [
   {
@@ -30,6 +31,7 @@ const VALUES = [
 ]
 
 export function AboutPage() {
+  const { isAuthenticated, dashboardPath } = useAuth()
   return (
     <>
       {/* Hero */}
@@ -145,7 +147,9 @@ export function AboutPage() {
             Ready to start building?
           </h2>
           <p className="mx-auto mt-4 max-w-xl font-medium text-background/70">
-            Join free and enroll in your first course today.
+            {isAuthenticated
+              ? 'Jump back in and keep learning.'
+              : 'Join free and enroll in your first course today.'}
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button size="lg" asChild>
@@ -154,9 +158,15 @@ export function AboutPage() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" asChild>
-              <Link to="/signup">Create free account</Link>
-            </Button>
+            {isAuthenticated ? (
+              <Button size="lg" variant="outline" asChild>
+                <Link to={dashboardPath}>Go to dashboard</Link>
+              </Button>
+            ) : (
+              <Button size="lg" variant="outline" asChild>
+                <Link to="/signup">Create free account</Link>
+              </Button>
+            )}
           </div>
         </div>
       </section>

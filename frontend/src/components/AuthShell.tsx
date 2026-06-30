@@ -12,7 +12,7 @@ const PERKS = [
  *  Shared by Login + Signup so the two stay consistent. */
 export function AuthShell({ children }: { children: ReactNode }) {
   return (
-    <div className="grid min-h-[calc(100svh-4rem)] lg:grid-cols-2">
+    <div className="grid min-h-svh lg:grid-cols-2">
       {/* Left: brand panel (desktop) */}
       <aside className="bg-dots relative hidden overflow-hidden border-r-2 border-ink bg-tint px-12 lg:flex lg:flex-col lg:justify-center">
         <div

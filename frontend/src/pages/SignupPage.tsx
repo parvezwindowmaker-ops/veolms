@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { apiErrorMessage } from '@/lib/api'
 import { AuthShell } from '@/components/AuthShell'
@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 export function SignupPage() {
-  const { register, becomeInstructor } = useAuth()
+  const { register, becomeInstructor, isAuthenticated, dashboardPath } = useAuth()
   const navigate = useNavigate()
   const [params] = useSearchParams()
   // "Sign up to start teaching" links here with ?role=instructor. Accounts are
@@ -56,6 +56,11 @@ export function SignupPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Already signed in (e.g. navigating here with a valid session): skip the form.
+  if (isAuthenticated) {
+    return <Navigate to={dashboardPath} replace />
   }
 
   return (

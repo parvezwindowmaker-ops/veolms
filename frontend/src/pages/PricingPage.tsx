@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Check, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useAuth } from '@/context/AuthContext'
 
 const PLANS = [
   {
@@ -77,6 +78,7 @@ const FAQ = [
 ]
 
 export function PricingPage() {
+  const { isAuthenticated } = useAuth()
   return (
     <>
       {/* Hero */}
@@ -121,7 +123,13 @@ export function PricingPage() {
       {/* Plans */}
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          {PLANS.map((plan) => (
+          {PLANS.map((plan) => {
+            // The "Create free account" CTA only makes sense for guests; signed-in
+            // users already have one, so send them to browse instead.
+            const signupCta = plan.to === '/signup'
+            const cta = signupCta && isAuthenticated ? 'Browse free courses' : plan.cta
+            const to = signupCta && isAuthenticated ? '/courses' : plan.to
+            return (
             <div
               key={plan.name}
               className={
@@ -161,13 +169,14 @@ export function PricingPage() {
                 ))}
               </ul>
               <Button asChild size="lg" variant={plan.variant} className="mt-7 w-full">
-                <Link to={plan.to}>
-                  {plan.cta}
+                <Link to={to}>
+                  {cta}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
             </div>
-          ))}
+            )
+          })}
         </div>
       </section>
 
