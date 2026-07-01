@@ -1,9 +1,14 @@
-// VeoLMS backend CI/CD — single-server deploy.
+// VeoLMS CI/CD — backend + frontend, single-server deploy.
 //
 // Model: Jenkins itself runs INSIDE a Docker container and drives the HOST's
 // Docker daemon (Docker-out-of-Docker — the host's /var/run/docker.sock is
-// mounted into Jenkins). The pipeline builds the backend image and (re)runs it as
-// a sibling container on the host. No registry, no remote SSH.
+// mounted into Jenkins). The pipeline builds each service's image and (re)runs it
+// as a sibling container on the host. No registry, no remote SSH.
+//
+// Frontend: a static Vite SPA. It is BUILT via docker build (frontend/Dockerfile)
+// and the compiled files are copied onto the host's own nginx web root — nginx is
+// configured/served separately on the host, not by this pipeline. VITE_* vars are
+// inlined at BUILD time, so the API base URL is passed as --build-arg VITE_API_URL.
 //
 // Key consequence: the docker DAEMON is the host's, so anything the daemon
 // resolves (`-v` bind mounts, `-p`, `--add-host`, `--restart`) refers to the
@@ -44,6 +49,12 @@ pipeline {
     PORT       = '5005'             // host + container port on the server
     BUILD_CTX  = 'backend'          // Dockerfile lives in ./backend
     ENV_FILE   = '/opt/veolms/.env' // runtime config on the server
+
+    // Frontend (static SPA — built here, served by the host's own nginx).
+    FE_IMAGE      = 'veolms-frontend'
+    FE_BUILD_CTX  = 'frontend'                          // Dockerfile lives in ./frontend
+    FE_DEPLOY_DIR = '/opt/veolms/web'                   // host nginx web root — set to yours
+    VITE_API_URL  = 'https://ptmsoftware.me/veolms-api' // baked into the build
   }
 
   stages {
@@ -53,7 +64,7 @@ pipeline {
       }
     }
 
-    stage('Build image') {
+    stage('Build backend image') {
       steps {
         // The Dockerfile already runs `tsc` in its build stage, so a type error
         // here fails the build (that's our compile gate). Tag with the build
@@ -65,7 +76,7 @@ pipeline {
       }
     }
 
-    stage('Deploy') {
+    stage('Deploy backend') {
       steps {
         sh '''
           set -e
@@ -94,7 +105,7 @@ pipeline {
       }
     }
 
-    stage('Verify') {
+    stage('Verify backend') {
       steps {
         // Wait for the app to report ready. The backend connects to Postgres
         // (and seeds on an empty DB) before it logs "listening on port", so a
@@ -125,13 +136,61 @@ pipeline {
         '''
       }
     }
+
+    stage('Build frontend image') {
+      steps {
+        // Vite inlines VITE_API_URL at build time (passed as a build-arg) and the
+        // Dockerfile runs `tsc -b && vite build`, so a type error fails the build.
+        sh '''
+          set -e
+          docker build \
+            --build-arg VITE_API_URL="$VITE_API_URL" \
+            -t "$FE_IMAGE:$BUILD_NUMBER" -t "$FE_IMAGE:latest" "$FE_BUILD_CTX"
+        '''
+      }
+    }
+
+    stage('Publish frontend') {
+      steps {
+        // Copy the freshly built static files onto the host's nginx web root.
+        // Jenkins can't see the host FS directly, so we hop through a throwaway
+        // container: the -v mount is resolved by the HOST daemon, so /out is the
+        // HOST directory. The build image just carries /dist (no server).
+        sh '''
+          set -e
+          # Fail early if the target web root doesn't exist on the host (a missing
+          # dir would otherwise be auto-created as an empty root-owned mount).
+          DEPLOY_PARENT=$(dirname "$FE_DEPLOY_DIR")
+          DEPLOY_NAME=$(basename "$FE_DEPLOY_DIR")
+          docker run --rm -v "$DEPLOY_PARENT":/host:ro alpine test -d "/host/$DEPLOY_NAME" \
+            || { echo "ERROR: $FE_DEPLOY_DIR not found on the host"; exit 1; }
+
+          # Clear the old build, then copy the new one in (dotfiles included).
+          docker run --rm -v "$FE_DEPLOY_DIR":/out "$FE_IMAGE:$BUILD_NUMBER" \
+            sh -c 'rm -rf /out/* && cp -a /dist/. /out/'
+        '''
+      }
+    }
+
+    stage('Verify frontend') {
+      steps {
+        // Confirm the entry file actually landed on the host web root. Serving is
+        // the host nginx's job, so there's no container/port to health-check here.
+        sh '''
+          set -e
+          docker run --rm -v "$FE_DEPLOY_DIR":/out:ro alpine test -f /out/index.html \
+            || { echo "ERROR: index.html missing in $FE_DEPLOY_DIR after publish"; exit 1; }
+          echo "Frontend published to $FE_DEPLOY_DIR (served by host nginx)."
+        '''
+      }
+    }
   }
 
   post {
     success {
       // Drop dangling images so repeated builds don't fill the disk.
       sh 'docker image prune -f >/dev/null 2>&1 || true'
-      echo "Deployed $IMAGE:$BUILD_NUMBER on port $PORT."
+      echo "Deployed backend $IMAGE:$BUILD_NUMBER on port $PORT; frontend published to $FE_DEPLOY_DIR."
     }
     failure {
       sh 'docker logs --tail 80 "$CONTAINER" 2>/dev/null || true'
