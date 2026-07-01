@@ -31,6 +31,8 @@ export class Course extends Model<
   declare thumbnailAssetId: CreationOptional<ForeignKey<number> | null>;
   /** Uploaded wide banner image (R2) for the course detail hero. */
   declare bannerAssetId: CreationOptional<ForeignKey<number> | null>;
+  /** Short intro/trailer video (R2) shown on the course detail page before enrolment. */
+  declare trailerAssetId: CreationOptional<ForeignKey<number> | null>;
   /** Price in the smallest currency unit (paise). 0 = free. */
   declare price: CreationOptional<number>;
   /** Optional sale price (paise), strictly less than `price` when set. */
@@ -58,6 +60,7 @@ export class Course extends Model<
   declare lessons?: NonAttribute<Lesson[]>;
   declare thumbnailAsset?: NonAttribute<MediaAsset | null>;
   declare bannerAsset?: NonAttribute<MediaAsset | null>;
+  declare trailerAsset?: NonAttribute<MediaAsset | null>;
 }
 
 Course.init(
@@ -70,6 +73,7 @@ Course.init(
     instructorId: { type: DataTypes.BIGINT, allowNull: false },
     thumbnailAssetId: { type: DataTypes.BIGINT, allowNull: true },
     bannerAssetId: { type: DataTypes.BIGINT, allowNull: true },
+    trailerAssetId: { type: DataTypes.BIGINT, allowNull: true },
     // Money is stored in minor units (paise) as an integer to avoid float drift.
     price: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
     discountPrice: { type: DataTypes.INTEGER, allowNull: true },

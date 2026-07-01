@@ -42,6 +42,7 @@ export function CourseDetailPage() {
   const [preview, setPreview] = useState<Lesson | null>(null)
   const [buying, setBuying] = useState(false)
   const [error, setError] = useState('')
+  const [showTrailer, setShowTrailer] = useState(false)
   if (isLoading) {
     return <div className="mx-auto max-w-5xl px-4 py-20 text-muted-foreground">Loading…</div>
   }
@@ -275,11 +276,29 @@ export function CourseDetailPage() {
           <div className="lg:col-span-1">
             <div className="pop overflow-hidden lg:sticky lg:top-20">
               <div className="aspect-video w-full">
-                {course.thumbnail ? (
-                  <img src={course.thumbnail} alt="" className="h-full w-full object-cover" />
+                {showTrailer && course.trailer ? (
+                  <LessonPlayer source={course.trailer.source} url={course.trailer.url} />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary to-amber text-white">
-                    <BookOpen className="h-12 w-12" />
+                  <div className="relative h-full w-full">
+                    {course.thumbnail ? (
+                      <img src={course.thumbnail} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary to-amber text-white">
+                        <BookOpen className="h-12 w-12" />
+                      </div>
+                    )}
+                    {course.trailer && (
+                      <button
+                        type="button"
+                        onClick={() => setShowTrailer(true)}
+                        aria-label="Play trailer"
+                        className="absolute inset-0 flex items-center justify-center bg-ink/30 transition-colors hover:bg-ink/50"
+                      >
+                        <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 text-primary-strong shadow-lg">
+                          <PlayCircle className="h-9 w-9" />
+                        </span>
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

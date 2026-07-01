@@ -7,6 +7,7 @@ import { useCategories } from '@/features/courses/api'
 import { apiErrorMessage } from '@/lib/api'
 import { Decor } from '@/components/layout/Decor'
 import { ThumbnailField, type ThumbnailValue } from '@/components/admin/ThumbnailField'
+import { TrailerField, type TrailerValue } from '@/components/admin/TrailerField'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -60,6 +61,7 @@ export function NewCoursePage() {
   const [description, setDescription] = useState('')
   const [thumbnail, setThumbnail] = useState<ThumbnailValue>({ assetId: null })
   const [banner, setBanner] = useState<ThumbnailValue>({ assetId: null })
+  const [trailer, setTrailer] = useState<TrailerValue>({ assetId: null })
   const [level, setLevel] = useState<(typeof LEVELS)[number]>('beginner')
   const [categoryId, setCategoryId] = useState('')
   const [language, setLanguage] = useState('English')
@@ -108,12 +110,15 @@ export function NewCoursePage() {
         thumbnail.assetId != null ? { thumbnailAssetId: thumbnail.assetId } : {}
       const bannerField =
         banner.assetId != null ? { bannerAssetId: banner.assetId } : {}
+      const trailerField =
+        trailer.assetId != null ? { trailerAssetId: trailer.assetId } : {}
       const course = await create.mutateAsync({
         title: title.trim(),
         subtitle: subtitle.trim() || undefined,
         description: description.trim() || undefined,
         ...thumb,
         ...bannerField,
+        ...trailerField,
         level,
         price,
         ...(discountPrice != null ? { discountPrice } : {}),
@@ -239,6 +244,17 @@ export function NewCoursePage() {
             hint="Wide hero image shown at the top of the course page."
           />
           <ThumbnailField value={banner} onChange={setBanner} hideLabel />
+        </section>
+
+        <div className="border-t-2 border-dashed border-border" />
+
+        {/* Trailer video */}
+        <section className="space-y-4">
+          <SectionHeader
+            title="Trailer video"
+            hint="Short intro video shown on the course page to attract students."
+          />
+          <TrailerField value={trailer} onChange={setTrailer} hideLabel />
         </section>
 
         <div className="border-t-2 border-dashed border-border" />

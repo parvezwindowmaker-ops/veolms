@@ -78,6 +78,10 @@ export function defineAssociations(): void {
   MediaAsset.hasMany(Course, { foreignKey: 'bannerAssetId', onDelete: 'SET NULL' });
   Course.belongsTo(MediaAsset, { foreignKey: 'bannerAssetId', as: 'bannerAsset' });
 
+  // Course trailer video -> media asset (same SET NULL semantics).
+  MediaAsset.hasMany(Course, { foreignKey: 'trailerAssetId', onDelete: 'SET NULL' });
+  Course.belongsTo(MediaAsset, { foreignKey: 'trailerAssetId', as: 'trailerAsset' });
+
   // Payments (purchase records). Mirror the enrollment lifecycle: removing a
   // user/course removes their payment rows too. (A production system would
   // soft-delete to preserve the financial audit trail; documented tradeoff.)

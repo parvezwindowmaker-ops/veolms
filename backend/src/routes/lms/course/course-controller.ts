@@ -18,10 +18,13 @@ import { validateCoursePrice } from './course-pricing';
 import {
   THUMBNAIL_ASSET_INCLUDE,
   BANNER_ASSET_INCLUDE,
+  TRAILER_ASSET_INCLUDE,
   resolveThumbnailUrl,
   resolveBannerUrl,
+  resolveTrailerPlayback,
   serializeCourse,
   validateImageAsset,
+  validateVideoAsset,
 } from './course-thumbnail';
 import {
   calculatePaginationInfo,
@@ -289,6 +292,7 @@ export const getCourseById = async (
       { model: User, as: 'instructor', attributes: INSTRUCTOR_ATTRS },
       THUMBNAIL_ASSET_INCLUDE,
       BANNER_ASSET_INCLUDE,
+      TRAILER_ASSET_INCLUDE,
       {
         model: Section,
         as: 'sections',
@@ -339,8 +343,10 @@ export const getCourseById = async (
   // Replace the stored values with resolved display URLs; drop the internal assets.
   data.thumbnail = await resolveThumbnailUrl(course);
   data.banner = await resolveBannerUrl(course);
+  data.trailer = await resolveTrailerPlayback(course, req.user?.id ?? 0);
   delete data.thumbnailAsset;
   delete data.bannerAsset;
+  delete data.trailerAsset;
 
   // Aggregate stats computed from the already-loaded sections/lessons + a single
   // enrollment count, so the public page can show lessons / duration / students.
@@ -385,6 +391,7 @@ export const addCourse = async (req: Request, res: Response): Promise<void> => {
     whoThisIsFor,
     thumbnailAssetId,
     bannerAssetId,
+    trailerAssetId,
     price,
     discountPrice,
   } = req.body ?? {};
@@ -404,6 +411,10 @@ export const addCourse = async (req: Request, res: Response): Promise<void> => {
   if (bannerAssetId !== undefined && bannerAssetId !== null) {
     bannerId = await validateImageAsset(bannerAssetId, req.user, 'bannerAssetId');
   }
+  let trailerId: number | null = null;
+  if (trailerAssetId !== undefined && trailerAssetId !== null) {
+    trailerId = await validateVideoAsset(trailerAssetId, req.user, 'trailerAssetId');
+  }
 
   // price is in paise (₹1 = 100); defaults to 0 (free) when omitted.
   const resolvedPrice = price === undefined ? 0 : validateCoursePrice(price);
@@ -421,6 +432,7 @@ export const addCourse = async (req: Request, res: Response): Promise<void> => {
     whoThisIsFor: toStringList(whoThisIsFor) ?? [],
     thumbnailAssetId: thumbAssetId,
     bannerAssetId: bannerId,
+    trailerAssetId: trailerId,
     price: resolvedPrice,
     discountPrice: resolveDiscountPrice(discountPrice, resolvedPrice),
     instructorId: req.user!.id,
@@ -450,6 +462,7 @@ export const updateCourse = async (
     whoThisIsFor,
     thumbnailAssetId,
     bannerAssetId,
+    trailerAssetId,
     price,
     discountPrice,
   } = req.body ?? {};
@@ -459,6 +472,7 @@ export const updateCourse = async (
 
   const previousThumbId = course.thumbnailAssetId ?? null;
   const previousBannerId = course.bannerAssetId ?? null;
+  const previousTrailerId = course.trailerAssetId ?? null;
 
   if (title !== undefined) course.title = title;
   if (subtitle !== undefined) course.subtitle = subtitle;
@@ -488,6 +502,12 @@ export const updateCourse = async (
         ? null
         : await validateImageAsset(bannerAssetId, req.user, 'bannerAssetId');
   }
+  if (trailerAssetId !== undefined) {
+    course.trailerAssetId =
+      trailerAssetId === null
+        ? null
+        : await validateVideoAsset(trailerAssetId, req.user, 'trailerAssetId');
+  }
   if (price !== undefined) course.price = validateCoursePrice(price);
   // Re-validate discount against the (possibly new) price whenever either changes.
   if (discountPrice !== undefined || price !== undefined) {
@@ -505,6 +525,9 @@ export const updateCourse = async (
   }
   if (previousBannerId && previousBannerId !== course.bannerAssetId) {
     if ((await assetReferenceCount(previousBannerId)) === 0) orphaned.push(previousBannerId);
+  }
+  if (previousTrailerId && previousTrailerId !== course.trailerAssetId) {
+    if ((await assetReferenceCount(previousTrailerId)) === 0) orphaned.push(previousTrailerId);
   }
   if (orphaned.length > 0) await purgeAssetsByIds(orphaned);
 
@@ -555,6 +578,7 @@ export const deleteCourse = async (
       ...lessons.map((l) => l.videoAssetId).filter((v): v is number => v != null),
       ...(course.thumbnailAssetId ? [course.thumbnailAssetId] : []),
       ...(course.bannerAssetId ? [course.bannerAssetId] : []),
+      ...(course.trailerAssetId ? [course.trailerAssetId] : []),
     ]),
   ];
 
@@ -568,4 +592,22 @@ export const deleteCourse = async (
   await purgeAssetsByIds(toPurge);
 
   res.status(200).json({ message: 'Course deleted successfully' });
+};
+
+/**
+ * Return a playback descriptor for the course trailer — HLS (preferred) or
+ * presigned R2 MP4. Publicly accessible for published courses (trailers are
+ * marketing content; no enrolment required). Draft trailers are gated to
+ * the instructor/admin so they can preview before publishing.
+ */
+export const getTrailer = async (req: Request, res: Response): Promise<void> => {
+  const course = await Course.findByPk(req.params.id, { include: [TRAILER_ASSET_INCLUDE] });
+  if (!course) throw new ApiError(404, 'Course not found');
+  if (course.status !== 'published' && !isAdminOrOwner(req.user, course.instructorId)) {
+    throw new ApiError(403, 'Course not available');
+  }
+  if (!course.trailerAssetId) throw new ApiError(404, 'This course has no trailer');
+  const playback = await resolveTrailerPlayback(course, req.user?.id ?? 0);
+  if (!playback) throw new ApiError(409, 'Trailer is not ready yet');
+  res.status(200).json({ data: playback, message: 'Trailer playback URL issued' });
 };

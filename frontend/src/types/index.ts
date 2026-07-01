@@ -46,6 +46,9 @@ export interface Course {
   thumbnailAssetId?: number | null
   banner?: string | null
   bannerAssetId?: number | null
+  /** Playback descriptor returned by GET /course/trailer/:id — only present in course detail. */
+  trailer?: { source: 'hls' | 'r2'; url: string } | null
+  trailerAssetId?: number | null
   price: number // paise
   discountPrice?: number | null // paise
   currency: string

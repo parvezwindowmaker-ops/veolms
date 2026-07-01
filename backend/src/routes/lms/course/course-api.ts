@@ -11,6 +11,7 @@ import {
   getCatalog,
   getCourseById,
   getMyCourses,
+  getTrailer,
   publishCourse,
   unpublishCourse,
   updateCourse,
@@ -32,6 +33,12 @@ router.get(
   optional_auth_middleware,
   id_checker_middleware,
   asyncHandler(getCourseById)
+);
+router.get(
+  '/trailer/:id',
+  optional_auth_middleware,
+  id_checker_middleware,
+  asyncHandler(getTrailer)
 );
 
 router.get('/all', auth_middleware, requireRole('Admin'), asyncHandler(getAllCourses));
